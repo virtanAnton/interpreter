@@ -14,6 +14,7 @@ import static jp.teamdecode.lexer.Token.Type.*;
 
 
 public class Parser {
+    private AST cache = null;
     private final Lexer lexer;
     private Token currentToken;
 
@@ -31,8 +32,10 @@ public class Parser {
     }
 
     public AST parse() throws LexerException, ParserException {
+        if (cache != null) return cache;
         AST node = program();
         if (currentToken.getType() != EOF) throw error(currentToken);
+        cache = node;
         return node;
     }
 

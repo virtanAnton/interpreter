@@ -110,12 +110,6 @@ public class Interpreter extends NodeVisitor {
         if (binOp.getOp().getType() == PLUS) {
             if (left instanceof Float || left instanceof Double
                     || right instanceof Float || right instanceof Double) {
-
-                System.out.println("left = " + left
-                        + "; class: " + left.getClass().getSimpleName()
-                        + "; right = " + right
-                        + "; class: " + left.getClass().getSimpleName()
-                        + "; result = " + left.doubleValue() + " " + right.doubleValue());
                 return left.doubleValue() + right.doubleValue();
             } else {
                 return left.intValue() + right.intValue();
@@ -137,8 +131,6 @@ public class Interpreter extends NodeVisitor {
         } else if (binOp.getOp().getType() == INTEGER_DIV) {
             return left.intValue() / right.intValue();
         } else if (binOp.getOp().getType() == FLOAT_DIV) {
-            System.out.println("left = " + left.doubleValue() + "; right = " + right.doubleValue()
-                    + "; result = " + left.doubleValue() / right.doubleValue());
             return left.doubleValue() / right.doubleValue();
         } else throw error(node, "Unknown operation " + binOp.getOp().getValue());
     }
