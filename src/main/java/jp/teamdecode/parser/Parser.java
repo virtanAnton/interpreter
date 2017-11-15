@@ -20,12 +20,14 @@ public class Parser {
     public Parser(Lexer lexer) throws LexerException {
         this.lexer = lexer;
         currentToken = lexer.getNextToken();
+        System.out.println(currentToken);
     }
 
     private void eat(Token.Type type) throws ParserException, LexerException {
-        if (currentToken.getType() == type)
+        if (currentToken.getType() == type) {
             currentToken = lexer.getNextToken();
-        else throw error(currentToken);
+            System.out.println(currentToken);
+        } else throw error(currentToken);
     }
 
     public AST parse() throws LexerException, ParserException {
@@ -115,6 +117,7 @@ public class Parser {
     private AST assignmentStatement() throws LexerException, ParserException {
         AST left = variable();
         Token token = currentToken;
+        eat(ASSIGN);
         AST right = expr();
         return new Assign(left, token, right);
     }
@@ -129,7 +132,7 @@ public class Parser {
             } else if (token.getType() == MINUS) {
                 eat(MINUS);
             }
-            return new BinOp(node, token, term());
+            node = new BinOp(node, token, term());
         }
         return node;
     }
@@ -147,7 +150,7 @@ public class Parser {
             } else if (token.getType() == INTEGER_DIV) {
                 eat(INTEGER_DIV);
             }
-            return new BinOp(node, token, factor());
+            node = new BinOp(node, token, factor());
         }
         return node;
     }
@@ -171,7 +174,9 @@ public class Parser {
             AST node = expr();
             eat(RPAREN);
             return node;
-        } else return variable();
+        } else if (token.getType() == ID) {
+            return variable();
+        } else throw error(token, "Cant handle factor()");
     }
 
     private AST variable() throws LexerException, ParserException {
@@ -186,5 +191,9 @@ public class Parser {
 
     private ParserException error(Token token) {
         return new ParserException("Parse error with token: " + token);
+    }
+
+    private ParserException error(Token token, String msg) {
+        return new ParserException("Parse error with token: " + token + "; " + msg);
     }
 }

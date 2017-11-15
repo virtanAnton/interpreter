@@ -3,11 +3,13 @@ package jp.teamdecode.lexer;
 import com.sun.istack.internal.Nullable;
 import jp.teamdecode.exception.LexerException;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.math.BigDecimal.ROUND_HALF_UP;
 import static jp.teamdecode.lexer.Token.Type.*;
 
 public class Lexer {
@@ -72,7 +74,8 @@ public class Lexer {
                     sb.append(currentChar);
                     advance();
                 }
-                return new Token(REAL_CONST, Float.parseFloat(sb.toString()));
+                Double real = Double.parseDouble(sb.toString());
+                return new Token(REAL_CONST, real);
             }
         }
         return new Token(INTEGER_CONST, Integer.parseInt(sb.toString()));
@@ -80,7 +83,9 @@ public class Lexer {
 
     private Token handleId() {
         StringBuilder sb = new StringBuilder();
-        while (Character.isAlphabetic(currentChar) || currentChar == '_') {
+        while (Character.isAlphabetic(currentChar)
+                || currentChar == '_'
+                || Character.isDigit(currentChar)) {
             sb.append(currentChar);
             advance();
         }
@@ -104,6 +109,8 @@ public class Lexer {
         else if (Character.isAlphabetic(currentChar) || currentChar == '_') return handleId();
         else if (Character.isDigit(currentChar)) return handleNumber();
         else if (currentChar == ':' && Objects.equals(pick(1), "=")) {
+            advance();
+            advance();
             return new Token(ASSIGN, ":=");
         } else if (currentChar == '+') {
             advance();

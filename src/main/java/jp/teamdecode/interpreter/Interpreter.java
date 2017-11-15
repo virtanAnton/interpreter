@@ -1,5 +1,6 @@
 package jp.teamdecode.interpreter;
 
+import com.sun.org.apache.bcel.internal.generic.FLOAD;
 import jp.teamdecode.ast.*;
 import jp.teamdecode.ast.visitor.NodeVisitor;
 import jp.teamdecode.exception.InternalException;
@@ -9,16 +10,17 @@ import jp.teamdecode.exception.ParserException;
 import jp.teamdecode.lexer.Token;
 import jp.teamdecode.parser.Parser;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import static jp.teamdecode.lexer.Token.Type.*;
 
-public class Interpeter extends NodeVisitor {
+public class Interpreter extends NodeVisitor {
     private final Map<String, Object> GLOBAL_SCOPE = new HashMap<>();
     private final Parser parser;
 
-    public Interpeter(Parser parser) {
+    public Interpreter(Parser parser) {
         this.parser = parser;
     }
 
@@ -36,6 +38,14 @@ public class Interpeter extends NodeVisitor {
         for (AST declaration : block.getDeclarations())
             visit(declaration);
         visit(block.getCompoundStatement());
+    }
+
+    public void visitVarDecl(AST node) {
+
+    }
+
+    public void visitType(AST node) {
+
     }
 
     public void visitCompound(AST node) throws InternalException, InterpreterException {
@@ -65,67 +75,71 @@ public class Interpeter extends NodeVisitor {
 
     public Object visitNum(AST node) throws InterpreterException {
         Num num = (Num) node;
+        Number value = (Number) num.getValue();
         if (num.getToke().getType() == INTEGER_CONST) {
-            return Integer.parseInt(num.getValue().toString());
+            return value;
         } else if (num.getToke().getType() == REAL_CONST) {
-            return Float.parseFloat(num.getValue().toString());
+            return value;
         } else throw error(node, "Unknown number type " + num.getValue());
     }
 
     public Object visitUnaryOp(AST node) throws InternalException, InterpreterException {
         UnaryOp unaryOp = (UnaryOp) node;
         Token.Type type = unaryOp.getOp().getType();
+        Number result = (Number) visit(unaryOp.getExpr());
+        if (result instanceof Long) throw error(node, "Unsupported type " + result);
         if (type == PLUS) {
-            Object result = visit(unaryOp.getExpr());
-            if (result instanceof Integer) {
-                return +(int) result;
-            } else if (result instanceof Double || result instanceof Float)
-                return +(float) result;
-            else throw error(node, "Unsupported type " + result);
+            if (result instanceof Float || result instanceof Double) {
+                return +result.doubleValue();
+            } else {
+                return +result.intValue();
+            }
         } else if (type == MINUS) {
-            Object result = visit(unaryOp.getExpr());
-            if (result instanceof Integer) {
-                return -(int) result;
-            } else if (result instanceof Double || result instanceof Float)
-                return -(float) result;
-            else throw error(node, "Unsupported type " + result);
+            if (result instanceof Float || result instanceof Double) {
+                return -result.doubleValue();
+            } else {
+                return -result.intValue();
+            }
         } else throw error(node, "Unknown unary operation type: " + unaryOp.getOp().getValue());
     }
 
     public Object visitBinOp(AST node) throws InternalException, InterpreterException {
         BinOp binOp = ((BinOp) node);
+        Number left = (Number) visit(binOp.getLeft());
+        Number right = (Number) visit(binOp.getRight());
         if (binOp.getOp().getType() == PLUS) {
-            Object left = visit(binOp.getLeft());
-            Object right = visit(binOp.getRight());
-            if (left instanceof Float || right instanceof Float) {
-                return ((double) left + (double) right);
+            if (left instanceof Float || left instanceof Double
+                    || right instanceof Float || right instanceof Double) {
+
+                System.out.println("left = " + left
+                        + "; class: " + left.getClass().getSimpleName()
+                        + "; right = " + right
+                        + "; class: " + left.getClass().getSimpleName()
+                        + "; result = " + left.doubleValue() + " " + right.doubleValue());
+                return left.doubleValue() + right.doubleValue();
             } else {
-                return ((int) left + (int) right);
+                return left.intValue() + right.intValue();
             }
         } else if (binOp.getOp().getType() == MINUS) {
-            Object left = visit(binOp.getLeft());
-            Object right = visit(binOp.getRight());
-            if (left instanceof Float || right instanceof Float) {
-                return ((double) left - (double) right);
+            if (left instanceof Float || left instanceof Double
+                    || right instanceof Float || right instanceof Double) {
+                return left.doubleValue() - right.doubleValue();
             } else {
-                return ((int) left - (int) right);
+                return left.intValue() - right.intValue();
             }
         } else if (binOp.getOp().getType() == MUL) {
-            Object left = visit(binOp.getLeft());
-            Object right = visit(binOp.getRight());
-            if (left instanceof Float || right instanceof Float) {
-                return ((double) left * (double) right);
+            if (left instanceof Float || left instanceof Double
+                    || right instanceof Float || right instanceof Double) {
+                return left.doubleValue() * right.doubleValue();
             } else {
-                return ((int) left * (int) right);
+                return left.intValue() * right.intValue();
             }
         } else if (binOp.getOp().getType() == INTEGER_DIV) {
-            Object left = visit(binOp.getLeft());
-            Object right = visit(binOp.getRight());
-            return ((int) left) / ((int) right);
+            return left.intValue() / right.intValue();
         } else if (binOp.getOp().getType() == FLOAT_DIV) {
-            Object left = visit(binOp.getLeft());
-            Object right = visit(binOp.getRight());
-            return ((double) left * (double) right);
+            System.out.println("left = " + left.doubleValue() + "; right = " + right.doubleValue()
+                    + "; result = " + left.doubleValue() / right.doubleValue());
+            return left.doubleValue() / right.doubleValue();
         } else throw error(node, "Unknown operation " + binOp.getOp().getValue());
     }
 
@@ -135,5 +149,9 @@ public class Interpeter extends NodeVisitor {
 
     private InterpreterException nameError(String varName) {
         return new InterpreterException("Variable not found " + varName);
+    }
+
+    public Map<String, Object> getGlobalScope() {
+        return Collections.unmodifiableMap(GLOBAL_SCOPE);
     }
 }
