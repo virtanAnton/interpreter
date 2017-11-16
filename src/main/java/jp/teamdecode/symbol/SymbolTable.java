@@ -14,8 +14,8 @@ public class SymbolTable {
     }
 
     private void initBuiltins() {
-        define(new BuildinTypeSymbol("INTEGER"));
-        define(new BuildinTypeSymbol("REAL"));
+        define(new BuiltinTypeSymbol("INTEGER"));
+        define(new BuiltinTypeSymbol("REAL"));
     }
 
     public void define(Symbol symbol) {
@@ -31,7 +31,15 @@ public class SymbolTable {
 
     @Override
     public String toString() {
-        return "SymbolTable: "
-                + table;
+        String header = "       SymbolTable \n" +
+                "========================\n";
+        StringBuilder sb = new StringBuilder(header);
+
+        for (Map.Entry<String, Symbol> entry : table.entrySet()) {
+            sb.append(String.format("%1$7s : %2$s", entry.getKey(),entry.getValue()));
+            sb.append('\n');
+        }
+
+        return sb.toString();
     }
 }

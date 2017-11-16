@@ -28,7 +28,7 @@ public class Parser {
         if (currentToken.getType() == type) {
             currentToken = lexer.getNextToken();
             System.out.println(currentToken);
-        } else throw error(currentToken);
+        } else throw error(type, currentToken.getType());
     }
 
     public AST parse() throws LexerException, ParserException {
@@ -202,6 +202,10 @@ public class Parser {
 
     private ParserException error(Token token) {
         return new ParserException("Parse error with token: " + token);
+    }
+
+    private ParserException error(Token.Type expected, Token.Type current) {
+        return new ParserException("Parse error. Expected: " + expected + "; current: " + current);
     }
 
     private ParserException error(Token token, String msg) {

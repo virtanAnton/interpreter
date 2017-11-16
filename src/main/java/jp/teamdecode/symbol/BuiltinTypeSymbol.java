@@ -1,8 +1,8 @@
 package jp.teamdecode.symbol;
 
-public class BuildinTypeSymbol extends Symbol {
+public class BuiltinTypeSymbol extends Symbol {
 
-    public BuildinTypeSymbol(String name) {
+    public BuiltinTypeSymbol(String name) {
         super(name);
     }
 

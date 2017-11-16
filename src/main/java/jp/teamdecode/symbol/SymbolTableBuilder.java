@@ -2,11 +2,11 @@ package jp.teamdecode.symbol;
 
 import jp.teamdecode.ast.*;
 import jp.teamdecode.ast.visitor.NodeVisitor;
+import jp.teamdecode.exception.BaseInterpreterException;
 import jp.teamdecode.exception.InternalException;
 import jp.teamdecode.exception.InterpreterException;
-import jp.teamdecode.exception.SymbolDeclarationException;
-
-import java.util.Collections;
+import jp.teamdecode.exception.symantic.TypeDeclarationException;
+import jp.teamdecode.exception.symantic.VariableDeclarationException;
 
 public class SymbolTableBuilder extends NodeVisitor {
     private final SymbolTable symbolTable;
@@ -61,33 +61,35 @@ public class SymbolTableBuilder extends NodeVisitor {
 
     }
 
-    public void visitAssign(AST node) throws SymbolDeclarationException {
-        Assign assign = (Assign) node;
-        String varName = ((Var) assign.getLeft()).getValue().toString();
-        if (symbolTable.lookup(varName) == null) throw error(varName);
+    public void visitAssign(AST node) throws TypeDeclarationException {
+//        Assign assign = (Assign) node;
+//        String varName = ((Var) assign.getLeft()).getValue().toString();
+//        if (symbolTable.lookup(varName) == null) throw error(varName);
     }
 
-    public void visitVar(AST node) throws SymbolDeclarationException {
-        Var var = (Var) node;
-        String varName = var.getValue().toString();
-        if (symbolTable.lookup(varName) == null) throw error(varName);
+    public void visitVar(AST node) throws TypeDeclarationException {
+//        Var var = (Var) node;
+//        String varName = var.getValue().toString();
+//        if (symbolTable.lookup(varName) == null) throw error(varName);
     }
 
-    public void visitVarDecl(AST node) throws SymbolDeclarationException {
+    public void visitVarDecl(AST node) throws TypeDeclarationException, VariableDeclarationException {
         VarDecl varDecl = (VarDecl) node;
         String typeName = ((Type) varDecl.getTypeNode()).getValue().toString();
         Symbol typeSymbol = symbolTable.lookup(typeName);
         if (typeSymbol == null) throw errorType(typeName);
         String varName = ((Var) varDecl.getVarNode()).getValue().toString();
+        Symbol foundedSymbol = symbolTable.lookup(varName);
+        if (foundedSymbol != null) throw errorVar(varName, foundedSymbol);
         symbolTable.define(new VarSymbol(varName, typeSymbol));
     }
 
-    private SymbolDeclarationException error(String name) {
-        return new SymbolDeclarationException("Variable \'" + name + "\' not declared");
+    private TypeDeclarationException errorType(String type) {
+        return new TypeDeclarationException("Type not found \'" + type + '\'');
     }
 
-    private SymbolDeclarationException errorType(String type) {
-        return new SymbolDeclarationException("Type not found \'" + type + '\'');
+    private VariableDeclarationException errorVar(String varName, Symbol symbol) {
+        return new VariableDeclarationException("Variable '" + varName + "' already defined: " + symbol);
     }
 
     public SymbolTable getSymbolTable() {
