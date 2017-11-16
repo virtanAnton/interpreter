@@ -18,6 +18,7 @@ public class Lexer {
     static {
         Map<String, Token> keywords = new HashMap<>();
         keywords.put("PROGRAM", new Token(PROGRAM, "PROGRAM"));
+        keywords.put("PROCEDURE", new Token(PROCEDURE, "PROCEDURE"));
         keywords.put("VAR", new Token(VAR, "VAR"));
         keywords.put("DIV", new Token(INTEGER_DIV, "DIV"));
         keywords.put("INTEGER", new Token(INTEGER, "INTEGER"));

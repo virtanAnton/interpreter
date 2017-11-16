@@ -17,4 +17,12 @@ public abstract class Symbol {
     public String toString() {
         return "<" + name + ":" + type + ">";
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public Symbol getType() {
+        return type;
+    }
 }

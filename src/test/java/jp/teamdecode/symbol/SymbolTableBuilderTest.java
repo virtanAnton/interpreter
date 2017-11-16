@@ -28,11 +28,14 @@ public class SymbolTableBuilderTest {
                 "END.  {Part11}";
         Lexer lexer = new Lexer(text);
         Parser parser = new Parser(lexer);
+
         SymbolTableBuilder symbolTableBuilder = new SymbolTableBuilder();
         AST ast = parser.parse();
         symbolTableBuilder.buildTable(ast);
+
         Interpreter interpreter = new Interpreter(parser);
         interpreter.interpret();
+
         SymbolTable symbolTable = symbolTableBuilder.getSymbolTable();
         System.out.println(symbolTable);
         System.out.println(interpreter.getGlobalScope());

@@ -33,6 +33,11 @@ public class Interpreter extends NodeVisitor {
         visit(program.getBlock());
     }
 
+    public void visitProcedureDecl(AST node) throws InternalException, InterpreterException {
+        ProcedureDecl decl = (ProcedureDecl) node;
+
+    }
+
     public void visitBlock(AST node) throws InternalException, InterpreterException {
         Block block = (Block) node;
         for (AST declaration : block.getDeclarations())

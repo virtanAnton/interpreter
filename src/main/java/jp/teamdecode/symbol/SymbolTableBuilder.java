@@ -31,6 +31,10 @@ public class SymbolTableBuilder extends NodeVisitor {
         visit(program.getBlock());
     }
 
+    public void visitProcedureDecl(AST node) throws InternalException, InterpreterException {
+
+    }
+
     public void visitBinOp(AST node) throws InternalException, InterpreterException {
         BinOp binOp = (BinOp) node;
         visit(binOp.getLeft());

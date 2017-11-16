@@ -10,6 +10,11 @@ public class Token {
         /**
          * reserved keyword
          */
+        PROCEDURE,
+
+        /**
+         * reserved keyword
+         */
         VAR,
 
         /**

@@ -2,6 +2,8 @@ package jp.teamdecode.interpreter;
 
 import jp.teamdecode.lexer.Lexer;
 import jp.teamdecode.parser.Parser;
+import jp.teamdecode.symbol.SymbolTable;
+import jp.teamdecode.symbol.SymbolTableBuilder;
 import org.junit.Test;
 
 import java.util.Map;
@@ -9,6 +11,8 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 
 public class InterpreterTest {
+    private final String REAL = "REAL";
+    private final String INTEGER = "INTEGER";
 
     @Test
     public void lesson10() throws Exception {
@@ -47,6 +51,49 @@ public class InterpreterTest {
         assertEquals(27, results.get("c"));
         assertEquals(11, results.get("x"));
         assertEquals(5.99714285714, ((Number) results.get("y")).doubleValue(), 1e-10);
+    }
+
+    @Test
+    public void lesson11() throws Exception {
+        String text = "PROGRAM Part12;\n" +
+                "VAR\n" +
+                "   a : INTEGER;\n" +
+                "\n" +
+                "PROCEDURE P1;\n" +
+                "VAR\n" +
+                "   a : REAL;\n" +
+                "   k : INTEGER;\n" +
+                "\n" +
+                "   PROCEDURE P2;\n" +
+                "   VAR\n" +
+                "      a, z : INTEGER;\n" +
+                "   BEGIN {P2}\n" +
+                "      z := 777;\n" +
+                "   END;  {P2}\n" +
+                "\n" +
+                "BEGIN {P1}\n" +
+                "\n" +
+                "END;  {P1}\n" +
+                "\n" +
+                "BEGIN {Part12}\n" +
+                "   a := 10;\n" +
+                "END.  {Part12}";
+        Lexer lexer = new Lexer(text);
+        Parser parser = new Parser(lexer);
+
+        SymbolTableBuilder symbolTableBuilder = new SymbolTableBuilder();
+        symbolTableBuilder.buildTable(parser.parse());
+
+        Interpreter interpreter = new Interpreter(parser);
+        interpreter.interpret();
+
+        Map<String, Object> results = interpreter.getGlobalScope();
+        System.out.println("results = " + results);
+        assertEquals(10, results.get("a"));
+
+        SymbolTable symbolTable = symbolTableBuilder.getSymbolTable();
+        System.out.println(symbolTable);
+        assertEquals(INTEGER, symbolTable.lookup("a").getType().getName());
     }
 
 }

@@ -61,6 +61,14 @@ public class Parser {
                 eat(SEMI);
             }
         }
+        while (currentToken.getType() == PROCEDURE) {
+            eat(PROCEDURE);
+            AST name = variable();
+            eat(SEMI);
+            AST block = block();
+            eat(SEMI);
+            declarations.add(new ProcedureDecl(name, block));
+        }
         return declarations.toArray(new AST[declarations.size()]);
 
     }
