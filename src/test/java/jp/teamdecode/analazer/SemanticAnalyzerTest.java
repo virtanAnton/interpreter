@@ -4,7 +4,6 @@ import jp.teamdecode.exception.InterpreterException;
 import jp.teamdecode.exception.symantic.VariableDeclarationException;
 import jp.teamdecode.lexer.Lexer;
 import jp.teamdecode.parser.Parser;
-import jp.teamdecode.symbol.SymbolTableBuilder;
 import org.junit.Test;
 
 import static org.junit.Assert.*;

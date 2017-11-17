@@ -5,17 +5,21 @@ import com.sun.istack.internal.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SymbolTable {
+public class ScopedSymbolTable {
     private final Map<String, Symbol> table;
+    private final int scopeLvl;
+    private final String scopeName;
+    private final ScopedSymbolTable enclosingScope;
 
-    public SymbolTable() {
-        table = new HashMap<>();
-        initBuiltins();
+    public ScopedSymbolTable(int scopeLvl, String scopeName) {
+        this(scopeLvl, scopeName, null);
     }
 
-    private void initBuiltins() {
-        define(new BuiltinTypeSymbol("INTEGER"));
-        define(new BuiltinTypeSymbol("REAL"));
+    public ScopedSymbolTable(int scopeLvl, String scopeName, ScopedSymbolTable enclosingScope) {
+        this.table = new HashMap<>();
+        this.scopeLvl = scopeLvl;
+        this.scopeName = scopeName;
+        this.enclosingScope = enclosingScope;
     }
 
     public void define(Symbol symbol) {
@@ -31,12 +35,13 @@ public class SymbolTable {
 
     @Override
     public String toString() {
-        String header = "       SymbolTable \n" +
+        String header = "       ScopedSymbolTable \n" +
                 "========================\n";
         StringBuilder sb = new StringBuilder(header);
 
+
         for (Map.Entry<String, Symbol> entry : table.entrySet()) {
-            sb.append(String.format("%1$7s : %2$s", entry.getKey(),entry.getValue()));
+            sb.append(String.format("%1$7s : %2$s", entry.getKey(), entry.getValue()));
             sb.append('\n');
         }
 

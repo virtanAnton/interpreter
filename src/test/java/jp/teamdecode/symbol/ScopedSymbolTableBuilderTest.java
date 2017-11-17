@@ -1,21 +1,16 @@
 package jp.teamdecode.symbol;
 
 import jp.teamdecode.ast.AST;
-import jp.teamdecode.exception.InternalException;
 import jp.teamdecode.exception.InterpreterException;
-import jp.teamdecode.exception.LexerException;
-import jp.teamdecode.exception.ParserException;
 import jp.teamdecode.exception.symantic.VariableDeclarationException;
 import jp.teamdecode.interpreter.Interpreter;
 import jp.teamdecode.lexer.Lexer;
 import jp.teamdecode.parser.Parser;
 import org.junit.Test;
 
-import java.util.Arrays;
-
 import static org.junit.Assert.*;
 
-public class SymbolTableBuilderTest {
+public class ScopedSymbolTableBuilderTest {
     private final String REAL = "REAL";
     private final String INTEGER = "INTEGER";
 
@@ -43,13 +38,13 @@ public class SymbolTableBuilderTest {
         Interpreter interpreter = new Interpreter(parser);
         interpreter.interpret();
 
-        SymbolTable symbolTable = symbolTableBuilder.getSymbolTable();
-        System.out.println(symbolTable);
+        ScopedSymbolTable scopedSymbolTable = symbolTableBuilder.getScopedSymbolTable();
+        System.out.println(scopedSymbolTable);
         System.out.println(interpreter.getGlobalScope());
-        assertEquals(INTEGER, symbolTable.lookup("number").type.name);
-        assertEquals(INTEGER, symbolTable.lookup("a").type.name);
-        assertEquals(INTEGER, symbolTable.lookup("b").type.name);
-        assertEquals(REAL, symbolTable.lookup("y").type.name);
+        assertEquals(INTEGER, scopedSymbolTable.lookup("number").type.name);
+        assertEquals(INTEGER, scopedSymbolTable.lookup("a").type.name);
+        assertEquals(INTEGER, scopedSymbolTable.lookup("b").type.name);
+        assertEquals(REAL, scopedSymbolTable.lookup("y").type.name);
     }
 
     @Test

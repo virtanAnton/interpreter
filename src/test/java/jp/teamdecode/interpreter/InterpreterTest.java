@@ -1,9 +1,9 @@
 package jp.teamdecode.interpreter;
 
+import jp.teamdecode.analazer.SemanticAnalyzer;
 import jp.teamdecode.lexer.Lexer;
 import jp.teamdecode.parser.Parser;
-import jp.teamdecode.symbol.SymbolTable;
-import jp.teamdecode.symbol.SymbolTableBuilder;
+import jp.teamdecode.symbol.ScopedSymbolTable;
 import org.junit.Test;
 
 import java.util.Map;
@@ -81,8 +81,8 @@ public class InterpreterTest {
         Lexer lexer = new Lexer(text);
         Parser parser = new Parser(lexer);
 
-        SymbolTableBuilder symbolTableBuilder = new SymbolTableBuilder();
-        symbolTableBuilder.buildTable(parser.parse());
+        SemanticAnalyzer analyzer = new SemanticAnalyzer();
+        analyzer.analyze(parser.parse());
 
         Interpreter interpreter = new Interpreter(parser);
         interpreter.interpret();
@@ -91,9 +91,9 @@ public class InterpreterTest {
         System.out.println("results = " + results);
         assertEquals(10, results.get("a"));
 
-        SymbolTable symbolTable = symbolTableBuilder.getSymbolTable();
-        System.out.println(symbolTable);
-        assertEquals(INTEGER, symbolTable.lookup("a").getType().getName());
+        ScopedSymbolTable scopedSymbolTable = analyzer.getScopedSymbolTable();
+        System.out.println(scopedSymbolTable);
+        assertEquals(INTEGER, scopedSymbolTable.lookup("a").getType().getName());
     }
 
 }

@@ -6,14 +6,18 @@ import jp.teamdecode.exception.InternalException;
 import jp.teamdecode.exception.InterpreterException;
 import jp.teamdecode.exception.symantic.TypeDeclarationException;
 import jp.teamdecode.exception.symantic.VariableDeclarationException;
-import jp.teamdecode.symbol.SymbolTable;
-import jp.teamdecode.symbol.SymbolTableBuilder;
+import jp.teamdecode.symbol.BuiltinTypeSymbol;
+import jp.teamdecode.symbol.Symbol;
+import jp.teamdecode.symbol.ScopedSymbolTable;
+import jp.teamdecode.symbol.VarSymbol;
 
 public class SemanticAnalyzer extends NodeVisitor {
-    private SymbolTableBuilder symbolTableBuilder = new SymbolTableBuilder();
+    private ScopedSymbolTable scopedSymbolTable;
 
     public void analyze(AST ast) throws InterpreterException, InternalException {
-        symbolTableBuilder.buildTable(ast);
+        scopedSymbolTable = new ScopedSymbolTable(0, "DomainScope");
+        scopedSymbolTable.define(new BuiltinTypeSymbol("INTEGER"));
+        scopedSymbolTable.define(new BuiltinTypeSymbol("REAL"));
         visit(ast);
     }
 
@@ -22,8 +26,8 @@ public class SemanticAnalyzer extends NodeVisitor {
         visit(program.getBlock());
     }
 
-    private SymbolTable getSymbolTable() {
-        return symbolTableBuilder.getSymbolTable();
+    public ScopedSymbolTable getScopedSymbolTable() {
+        return scopedSymbolTable;
     }
 
     public void visitBlock(AST node) throws InternalException, InterpreterException {
@@ -73,15 +77,32 @@ public class SemanticAnalyzer extends NodeVisitor {
     public void visitVar(AST node) throws VariableDeclarationException {
         Var var = (Var) node;
         String varName = var.getValue().toString();
-        if (getSymbolTable().lookup(varName) == null) throw errorVar(varName);
+        if (getScopedSymbolTable().lookup(varName) == null) throw errorVar(varName);
     }
 
-    public void visitVarDecl(AST node) throws TypeDeclarationException {
-
+    public void visitVarDecl(AST node) throws TypeDeclarationException, VariableDeclarationException {
+        VarDecl varDecl = (VarDecl) node;
+        String typeName = ((Type) varDecl.getTypeNode()).getValue().toString();
+        Symbol typeSymbol = scopedSymbolTable.lookup(typeName);
+        if (typeSymbol == null) throw errorType(typeName);
+        String varName = ((Var) varDecl.getVarNode()).getValue().toString();
+        Symbol foundedSymbol = scopedSymbolTable.lookup(varName);
+        if (foundedSymbol != null) throw errorVar(varName, foundedSymbol);
+        scopedSymbolTable.define(new VarSymbol(varName, typeSymbol));
     }
+
+
 
     private VariableDeclarationException errorVar(String varName) {
         return new VariableDeclarationException("Variable '" + varName + "' not declared");
+    }
+
+    private TypeDeclarationException errorType(String type) {
+        return new TypeDeclarationException("Type not found \'" + type + '\'');
+    }
+
+    private VariableDeclarationException errorVar(String varName, Symbol symbol) {
+        return new VariableDeclarationException("Variable '" + varName + "' already defined: " + symbol);
     }
 
 }
